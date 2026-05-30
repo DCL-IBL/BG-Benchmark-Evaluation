@@ -6,7 +6,7 @@ The project aims to develop a freely accessible infrastructure for the selection
 
 ## BG-Benchmark Evaluation 
 
-
+The BG-Benchmark Evaluation contains scripts allowing to run several evaluation tasks based on multichoice, e.g. evaluation on Bulgarian MMLU-BG, original MMLU-EN, and several others. The scripts process the communication with the LLMs and the extractions of the answer from the output.
 
 ## BG-Benchmark Evaluation Instructions
 
