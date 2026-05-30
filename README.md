@@ -11,7 +11,7 @@ The project aims to develop a freely accessible infrastructure for the selection
 ## BG-Benchmark Evaluation Instructions
 
 Install on a **Thundercompute** instance as follows:
-- Obtain MMLU-en.zip and MMLU-bg.zip and place them in the current directory of the script.
+- Obtain the benchmark, e.g. MMLU-en.zip and MMLU-bg.zip, and place them in the current directory of the script.
 - [Optional] For automatic uploading to Google Drive, generate a client secret for your Google Cloud client. Your Google account must authorize your client for access to your google drive. Replace client_secret.json with your own.
 - Copy the whole directory to your Thundercompute home directory, call it dimiterg (the name is currently hardcoded)
 - chmod +x ~/dimiterg/setup.sh
