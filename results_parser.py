@@ -132,7 +132,9 @@ def extract_stdout(tar_path, output_dir):
     with tarfile.open(tar_path, 'r:*') as tar:
         for member in tar.getmembers():
             if os.path.basename(member.name) == 'stdout.txt':
-                tar.extract(member, output_dir)
+                file_path = os.path.join(output_dir, member.name)
+                if not os.path.exists(file_path):
+                    tar.extract(member, output_dir)
                 return os.path.join(output_dir, member.name)
     return None
 
@@ -233,29 +235,43 @@ GROUPINGS = {
         'abstract_algebra',
         'anatomy',
         'astronomy',
+        'college_biology',
         'college_chemistry',
         'college_computer_science',
         'college_mathematics',
         'college_physics',
+        'conceptual_physics',
         'elementary_mathematics',
         'high_school_biology',
         'high_school_chemistry',
+        'high_school_computer_science',
         'high_school_mathematics',
         'high_school_physics',
+        'high_school_statistics',
+        'machine_learning',
+        'medical_genetics',
         'virology',
     ],
     'Humanities': [
         'formal_logic',
+        'high_school_european_history',
         'high_school_world_history',
+        'high_school_geography',
+        'high_school_government_and_politics',
+        'high_school_us_history',
         'logical_fallacies',
         'moral_disputes',
         'moral_scenarios',
         'philosophy',
         'prehistory',
         'world_religions',
+        'global_facts',
+        'international_law',
+        'jurisprudence',
     ],
     'Social Sciences': [
         'high_school_macroeconomics',
+        'high_school_microeconomics',
         'high_school_psychology',
         'human_sexuality',
         'sociology',
@@ -266,6 +282,8 @@ GROUPINGS = {
         'clinical_knowledge',
         'college_medicine',
         'computer_security',
+        'econometrics',
+        'electrical_engineering',
         'human_aging',
         'management',
         'marketing',
@@ -273,11 +291,13 @@ GROUPINGS = {
         'nutrition',
         'professional_accounting',
         'professional_medicine',
+        'professional_psychology',
         'public_relations',
         'security_studies',
     ],
 }
 
+# set(topics_from_dir) == set(map(lambda x: x + '_bg', {item for sublist in GROUPINGS.values() for item in sublist}))
 
 def write_utf8_file(file_path, content):
     print('Saving file: ' + file_path)
@@ -293,8 +313,10 @@ def write_utf8_file(file_path, content):
         f.write(content)
 
 
-en_files = process_tar_files('/var/home/person/Develop/results_parser/results_en')
-bg_files = process_tar_files('/var/home/person/Develop/results_parser/results_bg')
+en_files = process_tar_files('/home/person/Develop/testing_models_8bit_results_parser/tars/results_en')
+bg_files = process_tar_files('/home/person/Develop/testing_models_8bit_results_parser/tars/results_bg')
+print(en_files)
+print(bg_files)
 files = zip_many('en', en_files) + zip_many('bg', bg_files)
 assert len(files) == 16
 csv_lines = [
@@ -310,11 +332,34 @@ csv_lines = [
     'Professional Skills Correct']
 for (language, file_path) in files:
     model_name, results_dict = parse_output_file(file_path)
-    assert len(results_dict) == 39
+    new_results_dict = dict()
+    for results_key in results_dict.keys():
+        new_results_key = results_key
+        if results_key.endswith('_' + language):
+            new_results_key = results_key[0:len(results_key) - (len(language) + 1)]
+        new_results_dict[new_results_key] = results_dict[results_key]
+    assert len(results_dict) == len(new_results_dict)
+    results_dict = new_results_dict
+    print(sorted(results_dict.keys()))
+    assert len(results_dict) == 56
+    print("================================")
+    print("================================")
+    print(f"Language: {language}, Model: {model_name}")
+    print("================================")
+    for group in GROUPINGS:
+        print(f"Group {group}")
+        areas = GROUPINGS[group]
+        for area in areas:
+            if area not in results_dict:
+                print(f"area: {area} not in file: {file_path}")
+            results = results_dict[area]
+            print(f"{area}: {results[1]} of {results[0]}")
     grouped = group_subject_stats(results_dict, GROUPINGS)
     assert len(grouped) == 4
     assert len(GROUPINGS) == 4
-    print(f"lang: {language}, model: {model_name}, res: {len(results_dict)}, gr: {len(grouped)}")
+    print("================================")
+    for group in grouped:
+        print(f"{group}: {grouped[group][1]} of {grouped[group][0]}")
     csv_lines.append(','.join([
         f"{model_name}",
         f"{language}",
@@ -335,4 +380,5 @@ for (language, file_path) in files:
         # Professional Skills Correct
         f"{grouped['Professional Skills'][1]}",
     ]))
-write_utf8_file('/var/home/person/Develop/results_parser/results_per_category.csv', '\n'.join(csv_lines))
+print("================================")
+write_utf8_file('/var/home/person/Develop/testing_models_8bit_results_parser/results_per_category.csv', '\n'.join(csv_lines))
